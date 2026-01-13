@@ -5,6 +5,13 @@
 #define FULLY_ENTHRALLED 3
 #define OVERDOSE_ENTHRALLED 4
 
+// Temporary debug helper for MKUltra core.
+/proc/mkultra_base_debug(message)
+	// Minimal guard to keep logs quiet if desired.
+	if(!mkultra_debug_enabled)
+		return
+	world.log << "["MKULTRA-BASE"] [message]"
+
 
 
 /*//////////////////////////////////////////
@@ -66,9 +73,14 @@
 	var/custom_span
 	/// Set on on_apply. Will only be true if both individuals involved have opted in.
 	var/lewd = FALSE
+//SPLURT ADDITION START
+	/// Set to TRUE to bypass mindshield resistance.
+	var/ignore_mindshield = FALSE
+//SPLURT ADDITION END
 
 /datum/status_effect/chem/enthrall/on_apply()
 	var/mob/living/carbon/enthrall_victim = owner
+	mkultra_base_debug("apply enthrall to [enthrall_victim] (mindshield=[HAS_TRAIT(enthrall_victim, TRAIT_MINDSHIELD)] petchip=[HAS_TRAIT(enthrall_victim, TRAIT_PET_SKILLCHIP)])")
 	if(HAS_TRAIT(enthrall_victim, TRAIT_PET_SKILLCHIP))
 		var/obj/item/organ/brain/neopet_brain = enthrall_victim.get_organ_slot(ORGAN_SLOT_BRAIN)
 		for(var/obj/item/skillchip/mkiiultra/neopet_chip in neopet_brain?.skillchips)
@@ -79,11 +91,13 @@
 				lewd = TRUE
 		if(isnull(enthrall_mob))
 			stack_trace("A thrall has an MKUltra skillchip activated but the skillchip has no enthrall mob linked. This should never happen!")
+			mkultra_base_debug("apply failure: pet chip missing enthrall mob")
 			owner.remove_status_effect(src)
 			return ..()
 	else
 		var/datum/reagent/mkultra/enthrall_chem = locate(/datum/reagent/mkultra) in enthrall_victim.reagents.reagent_list
 		if(!enthrall_chem.data["enthrall_ckey"])
+			mkultra_base_debug("apply failure: enthrall reagent missing data on [enthrall_victim]")
 			message_admins("WARNING: FermiChem: No enthrall_mob found in thrall, did you bus in the status? You need to set up the vars manually in the chem if it's not reacted/bussed. Someone set up the reaction/status proc incorrectly if not (Don't use donor blood). Console them with a chemcat plush maybe?")
 			stack_trace("No enthrall_mob found in thrall, did you bus in the status? You need to set up the vars manually in the chem if it's not reacted/bussed. Someone set up the reaction/status proc incorrectly if not (Don't use donor blood). Console them with a chemcat plush maybe?")
 			owner.remove_status_effect(src)
@@ -96,6 +110,7 @@
 			return ..()
 		enthrall_mob = get_mob_by_key(enthrall_ckey)
 		lewd = (owner.client?.prefs?.read_preference(/datum/preference/toggle/erp/hypnosis)) && (enthrall_mob.client?.prefs?.read_preference(/datum/preference/toggle/erp/hypnosis))
+	mkultra_base_debug("apply success: enthraller=[enthrall_mob] lewd=[lewd] ignore_mindshield=[ignore_mindshield]")
 
 	RegisterSignal(owner, COMSIG_LIVING_RESIST, .proc/owner_resist) //Do resistance calc if resist is pressed#
 	RegisterSignal(owner, COMSIG_MOVABLE_HEAR, .proc/owner_hear)
@@ -121,9 +136,11 @@
 		if(owner.reagents.has_reagent(/datum/reagent/medicine/neurine))
 			mental_capacity += 10
 
-	//mindshield check
-	if(HAS_TRAIT(enthrall_victim, TRAIT_MINDSHIELD))//If you manage to enrapture a head, wow, GJ. (resisting gives a bigger bonus with a mindshield) From what I can tell, this isn't possible.
+//mindshield check
+//SPLURT EDIT ORIGINAL: if(HAS_TRAIT(enthrall_victim, TRAIT_MINDSHIELD))//If you manage to enrapture a head, wow, GJ. (resisting gives a bigger bonus with a mindshield) From what I can tell, this isn't possible.
+	if(!ignore_mindshield && HAS_TRAIT(enthrall_victim, TRAIT_MINDSHIELD))//If you manage to enrapture a head, wow, GJ. (resisting gives a bigger bonus with a mindshield) From what I can tell, this isn't possible.
 		resistance_tally += 2
+		mkultra_base_debug("tick mindshield resist: [enthrall_victim] +2 (resist=[resistance_tally])")
 		if(prob(10))
 			to_chat(owner, span_warning("You feel lucidity returning to your mind as the mindshield buzzes, attempting to return your brain to normal function."))
 		if(phase == OVERDOSE_ENTHRALLED)
@@ -150,6 +167,7 @@
 				resistance_tally /= 2
 				enthrall_tally = 0
 				SSblackbox.record_feedback("tally", "fermi_chem", 1, "Enthralled to state 2")
+				mkultra_base_debug("phase shift: [enthrall_victim] -> PARTIALLY_ENTHRALLED")
 				if(lewd)
 					to_chat(owner, span_velvet_notice("Your conciousness slips, as you sink deeper into trance and servitude."))
 				else
@@ -157,6 +175,7 @@
 
 			else if(resistance_tally >= 48)
 				phase = ENTHRALL_BROKEN
+				mkultra_base_debug("phase break: [enthrall_victim] resisted out (phase 1)")
 				to_chat(owner, span_warning("You break free of the influence in your mind, your thoughts suddenly turning lucid!"))
 				if(distance_apart < 10)
 					to_chat(enthrall_mob, span_warning("[(lewd?"Your pet":"Your thrall")] seems to have broken free of your enthrallment!"))
@@ -171,6 +190,7 @@
 				mental_capacity -= resistance_tally//leftover resistance per step is taken away from mental_capacity.
 				enthrall_tally = 0
 				resistance_tally /= 2
+				mkultra_base_debug("phase shift: [enthrall_victim] -> FULLY_ENTHRALLED")
 				if(lewd)
 					to_chat(owner, span_userlove("Your mind gives, eagerly obeying and serving [enthrall_mob]."))
 					to_chat(owner, span_userlove("You are now fully enthralled to [enthrall_mob], and eager to follow their commands. However you find that in your intoxicated state you are unable to resort to violence. Equally you are unable to commit suicide, even if ordered to, as you cannot serve your [enthrall_gender] in death.")) //If people start using this as an excuse to be violent I'll just make them all pacifists so it's not OP.
@@ -183,6 +203,7 @@
 				phase = ENTHRALL_IN_PROGRESS
 				resistance_tally = 0
 				resist_modifier = 0
+				mkultra_base_debug("phase regress: [enthrall_victim] back to ENTHRALL_IN_PROGRESS")
 				to_chat(owner, span_notice("You manage to shake some of the effects from your addled mind, however you can still feel yourself drawn towards [enthrall_mob]."))
 			if(lewd && prob(10))
 				to_chat(owner, span_velvet("[pick("It feels so good to listen to [enthrall_gender].", "You can't keep your eyes off [enthrall_gender].", "[enthrall_gender]'s voice is making you feel so sleepy.",  "You feel so comfortable with [enthrall_gender]", "[enthrall_gender] is so dominant, it feels right to obey them.")]."))
@@ -364,7 +385,7 @@
 			else
 				status_strength -= 1
 				owner.heal_overall_damage(4, 4, 0, FALSE, FALSE)
-				cooldown += 1 //Cooldown doesn't process till status is done
+				mkultra_base_add_cooldown(src, 1) //Cooldown doesn't process till status is done
 
 		else if(status == "charge")
 			owner.add_movespeed_modifier(/datum/movespeed_modifier/status_effect/mkultra)
@@ -382,7 +403,7 @@
 				to_chat(owner, span_warning("Your body gives out as the adrenaline in your system runs out."))
 			else
 				status_strength -= 1
-				cooldown += 1 //Cooldown doesn't process till status is done
+				mkultra_base_add_cooldown(src, 1) //Cooldown doesn't process till status is done
 
 		else if(status == "pacify")
 			var/mob/living/carbon/carbon_owner = owner

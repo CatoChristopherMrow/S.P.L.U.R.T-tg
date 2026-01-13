@@ -3,6 +3,28 @@
 //////////////////////////////////////
 
 //Heavily modified voice of god code
+//SPLURT ADDITION START
+// Modular command handlers are registered here to avoid touching the base switch table below.
+// Share cooldown toggle with modular commands.
+/proc/mkultra_base_add_cooldown(datum/status_effect/chem/enthrall/enthrall_chem, amount)
+	if(!enthrall_chem)
+		return
+	if(mkultra_disable_cooldowns)
+		return
+	enthrall_chem.cooldown += amount
+
+var/global/list/mkultra_modular_command_handlers = list(
+	/proc/process_mkultra_command_cum,
+	/proc/process_mkultra_command_emote,
+	/proc/process_mkultra_command_follow,
+	/proc/process_mkultra_command_strip_slot,
+	/proc/process_mkultra_command_lust_up,
+	/proc/process_mkultra_command_lust_down,
+	/proc/process_mkultra_command_selfcall,
+	/proc/process_mkultra_command_selfcall_off,
+	/proc/process_mkultra_command_debug_phase,
+)
+//SPLURT ADDITION END
 /obj/item/organ/vocal_cords/velvet
 	name = "Velvet chords"
 	desc = "The voice spoken from these just make you want to drift off, sleep and obey."
@@ -124,6 +146,12 @@
 	if(debug == TRUE)
 		to_chat(world, "[user]'s power is [power_multiplier].")
 
+//SPLURT ADDITION START
+	for(var/command_handler in mkultra_modular_command_handlers)
+		if(call(command_handler)(message, user, listeners, power_multiplier))
+			return 0
+//SPLURT ADDITION END
+
 	//Mixables
 	var/static/regex/enthrall_words = regex("relax|obey|love|serve|so easy|ara ara")
 	var/static/regex/reward_words = regex("good boy|good girl|good pet|good job|good")
@@ -182,7 +210,7 @@
 				enthrall_chem.enthrall_tally += power_multiplier*1.25 //thinking about it, I don't know how this can proc
 			if(enthrall_chem.lewd)
 				addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='nicegreen'><i><b>[enthrall_chem.enthrall_gender] is so nice to listen to.</b></i></span>"), 5)
-			enthrall_chem.cooldown += 1
+			mkultra_base_add_cooldown(enthrall_chem, 1)
 
 	//REWARD mixable works
 	if(findtext(message, reward_words))
@@ -197,14 +225,14 @@
 				if(HAS_TRAIT(enthrall_listener, TRAIT_MASOCHISM))
 					enthrall_chem.enthrall_tally -= power_multiplier
 					enthrall_chem.resistance_tally += power_multiplier
-					enthrall_chem.cooldown += 1
+					mkultra_base_add_cooldown(enthrall_chem, 1)
 			else
 				addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='nicegreen'><b><i>I've been praised for doing a good job!</b></i></span>"), 5)
 			enthrall_chem.resistance_tally -= power_multiplier
 			enthrall_chem.enthrall_tally += power_multiplier
 			var/descmessage = "<span class='love'><i>[(enthrall_chem.lewd?"I feel so happy! I'm a good pet who [enthrall_chem.enthrall_gender] loves!":"I did a good job!")]</i></span>"
 			enthrall_listener.add_mood_event("enthrallpraise", /datum/mood_event/enthrallpraise, descmessage)
-			enthrall_chem.cooldown += 1
+			mkultra_base_add_cooldown(enthrall_chem, 1)
 
 	//PUNISH mixable  works
 	else if(findtext(message, punish_words))
@@ -229,9 +257,9 @@
 				addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='warning'>I've failed [enthrall_chem.enthrall_mob]...</b></span>"), 5)
 				enthrall_chem.resistance_tally += power_multiplier
 				enthrall_chem.enthrall_tally += power_multiplier
-				enthrall_chem.cooldown += 1
+				mkultra_base_add_cooldown(enthrall_chem, 1)
 			enthrall_listener.add_mood_event("enthrallscold", /datum/mood_event/enthrallscold, descmessage)
-			enthrall_chem.cooldown += 1
+			mkultra_base_add_cooldown(enthrall_chem, 1)
 
 
 
@@ -380,7 +408,7 @@
 				speaktrigger += "[first_name(user.real_name)]!"
 			//say it!
 			addtimer(CALLBACK(humanoid, /atom/movable/proc/say, "[speaktrigger]"), 5)
-			enthrall_chem.cooldown += 1
+			mkultra_base_add_cooldown(enthrall_chem, 1)
 
 	//SILENCE
 	else if((findtext(message, silence_words)))
@@ -393,7 +421,7 @@
 				carbon_mob.adjust_silence((10 SECONDS * power_multiplier) * enthrall_chem.phase)
 			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, carbon_mob, "<span class='notice'>You are unable to speak!</b></span>"), 5)
 			to_chat(user, "<span class='notice'><i>You silence [carbon_mob].</i></span>")
-			enthrall_chem.cooldown += 3
+			mkultra_base_add_cooldown(enthrall_chem, 3)
 
 	//SPEAK
 	else if((findtext(message, speak_words)))//fix
@@ -401,7 +429,7 @@
 			var/datum/status_effect/chem/enthrall/enthrall_chem = carbon_mob.has_status_effect(/datum/status_effect/chem/enthrall)
 			REMOVE_TRAIT(carbon_mob, TRAIT_MUTE, "enthrall")
 			carbon_mob.set_silence(0 SECONDS)
-			enthrall_chem.cooldown += 3
+			mkultra_base_add_cooldown(enthrall_chem, 3)
 			to_chat(user, "<span class='notice'><i>You [(enthrall_chem.lewd?"allow [carbon_mob] to speak again":"encourage [carbon_mob] to speak again")].</i></span>")
 
 
@@ -413,7 +441,7 @@
 			enthrall_chem.status = "Antiresist"
 			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='big warning'>Your mind clouds over, as you find yourself unable to resist!</b></span>"), 5)
 			enthrall_chem.status_strength = (1 * power_multiplier * enthrall_chem.phase)
-			enthrall_chem.cooldown += 15//Too short? yes, made 15
+			mkultra_base_add_cooldown(enthrall_chem, 15)//Too short? yes, made 15
 			to_chat(user, "<span class='notice'><i>You frustrate [enthrall_listener]'s attempts at resisting.</i></span>")
 
 	//RESIST
@@ -423,7 +451,7 @@
 			power_multiplier *= distance_multiplier[get_dist(user, carbon_mob)+1]
 			enthrall_chem.delta_resist += (power_multiplier)
 			enthrall_chem.owner_resist()
-			enthrall_chem.cooldown += 2
+			mkultra_base_add_cooldown(enthrall_chem, 2)
 			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, carbon_mob, "<span class='notice'>You are spurred into resisting from [user]'s words!'</b></span>"), 5)
 			to_chat(user, "<span class='notice'><i>You spark resistance in [carbon_mob].</i></span>")
 
@@ -456,7 +484,7 @@
 			var/mob/living/enthrall_listener = enthrall_victim
 			var/datum/status_effect/chem/enthrall/enthrall_chem = enthrall_listener.has_status_effect(/datum/status_effect/chem/enthrall)
 			enthrall_listener.throw_at(get_step_towards(user,enthrall_listener), 3 * power_multiplier, 1 * power_multiplier)
-			enthrall_chem.cooldown += 3
+			mkultra_base_add_cooldown(enthrall_chem, 3)
 			addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You are drawn towards [user]!</b></span>"), 5)
 			to_chat(user, "<span class='notice'><i>You draw [enthrall_listener] towards you!</i></span>")
 
@@ -467,7 +495,7 @@
 			switch(enthrall_chem.phase)
 				if(2 to INFINITY)
 					carbon_mob.Sleeping(45 * power_multiplier)
-					enthrall_chem.cooldown += 10
+					mkultra_base_add_cooldown(enthrall_chem, 10)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, carbon_mob, "<span class='notice'>Drowsiness suddenly overwhelms you as you fall asleep!</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You send [carbon_mob] to sleep.</i></span>")
 
@@ -487,7 +515,7 @@
 							humanoid.dropItemToGround(W, TRUE)
 							return
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, humanoid, "<span class='[(enthrall_chem.lewd?"love":"warning")]'>Before you can even think about it, you quickly remove your clothes in response to [(enthrall_chem.lewd?"your [enthrall_chem.enthrall_gender]'s command'":"[enthrall_chem.enthrall_mob]'s directive'")].</b></span>"), 5)
-					enthrall_chem.cooldown += 10
+					mkultra_base_add_cooldown(enthrall_chem, 10)
 
 	//WALK
 	else if((findtext(message, walk_words)))
@@ -498,7 +526,7 @@
 				if(2 to INFINITY)
 					if(enthrall_listener.move_intent != MOVE_INTENT_WALK)
 						enthrall_listener.toggle_move_intent()
-						enthrall_chem.cooldown += 1
+						mkultra_base_add_cooldown(enthrall_chem, 1)
 						addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You slow down to a walk.</b></span>"), 5)
 						to_chat(user, "<span class='notice'><i>You encourage [enthrall_listener] to slow down.</i></span>")
 
@@ -511,7 +539,7 @@
 				if(2 to INFINITY)
 					if(enthrall_listener.move_intent != MOVE_INTENT_RUN)
 						enthrall_listener.toggle_move_intent()
-						enthrall_chem.cooldown += 1
+						mkultra_base_add_cooldown(enthrall_chem, 1)
 						addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You speed up into a jog!</b></span>"), 5)
 						to_chat(user, "<span class='notice'><i>You encourage [enthrall_listener] to pick up the pace!</i></span>")
 
@@ -523,7 +551,7 @@
 			switch(enthrall_chem.phase)
 				if(2 to INFINITY)
 					enthrall_listener.toggle_resting()
-					enthrall_chem.cooldown += 10
+					mkultra_base_add_cooldown(enthrall_chem, 10)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "[(enthrall_chem.lewd?"<span class='love'>You eagerly lie down!":"<span class='notice'>You suddenly lie down!")]</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You encourage [enthrall_listener] to lie down.</i></span>")
 
@@ -535,7 +563,7 @@
 			switch(enthrall_chem.phase)
 				if(2 to INFINITY)
 					enthrall_listener.StaminaKnockdown(30 * power_multiplier * enthrall_chem.phase)
-					enthrall_chem.cooldown += 8
+					mkultra_base_add_cooldown(enthrall_chem, 8)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You suddenly drop to the ground!</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You encourage [enthrall_listener] to drop down to the ground.</i></span>")
 
@@ -667,7 +695,7 @@
 				var/instill = stripped_input(user, "Instill an emotion in [humanoid].", MAX_MESSAGE_LEN)
 				to_chat(humanoid, "<i>[instill]</i>")
 				to_chat(user, "<span class='notice'><i>You sucessfully instill a feeling in [humanoid]</i></span>")
-				enthrall_chem.cooldown += 1
+				mkultra_base_add_cooldown(enthrall_chem, 1)
 
 	//RECOGNISE
 	else if((findtext(message, recognise_words)))
@@ -691,7 +719,7 @@
 				if(3)//Tier 3 only
 					enthrall_chem.status = "heal"
 					enthrall_chem.status_strength = (5 * power_multiplier)
-					enthrall_chem.cooldown += 5
+					mkultra_base_add_cooldown(enthrall_chem, 5)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You begin to lick your wounds.</b></span>"), 5)
 					enthrall_listener.Stun(15 * power_multiplier)
 					to_chat(user, "<span class='notice'><i>[enthrall_listener] begins to lick their wounds.</i></span>")
@@ -704,7 +732,7 @@
 			switch(enthrall_chem.phase)
 				if(3 to INFINITY)
 					enthrall_listener.Stun(40 * power_multiplier)
-					enthrall_chem.cooldown += 8
+					mkultra_base_add_cooldown(enthrall_chem, 8)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>Your muscles freeze up!</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You cause [enthrall_listener] to freeze up!</i></span>")
 
@@ -750,7 +778,7 @@
 					enthrall_listener.set_resting(FALSE, TRUE, FALSE)
 					enthrall_listener.SetAllImmobility(0)
 					enthrall_listener.SetUnconscious(0) //i said get up i don't care if you're being tased
-					enthrall_chem.cooldown += 10 //This could be really strong
+					mkultra_base_add_cooldown(enthrall_chem, 10) //This could be really strong
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You jump to your feet from sheer willpower!</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You spur [enthrall_listener] to their feet!</i></span>")
 
@@ -762,7 +790,7 @@
 			switch(enthrall_chem.phase)
 				if(3)//Tier 3 only
 					enthrall_chem.status = "pacify"
-					enthrall_chem.cooldown += 10
+					mkultra_base_add_cooldown(enthrall_chem, 10)
 					addtimer(CALLBACK(GLOBAL_PROC, .proc/to_chat, enthrall_listener, "<span class='notice'>You feel like never hurting anyone ever again.</b></span>"), 5)
 					to_chat(user, "<span class='notice'><i>You remove any intent to harm from [enthrall_listener]'s mind.</i></span>")
 
@@ -775,7 +803,7 @@
 				if(3)//Tier 3 only
 					enthrall_chem.status_strength = 2* power_multiplier
 					enthrall_chem.status = "charge"
-					enthrall_chem.cooldown += 10
+					mkultra_base_add_cooldown(enthrall_chem, 10)
 					to_chat(user, "<span class='notice'><i>You rally [enthrall_listener], leading them into a charge!</i></span>")
 
 	if(message_admins || debug)//Do you want this in?

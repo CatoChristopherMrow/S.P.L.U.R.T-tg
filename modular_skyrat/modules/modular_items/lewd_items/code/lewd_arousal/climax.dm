@@ -71,8 +71,15 @@
 
 	var/obj/item/organ/genital/testicles/testicles = get_organ_slot(ORGAN_SLOT_TESTICLES)
 	testicles?.calculate_cumshot()
+	var/has_testicles = (testicles != null) //SPLURT ADDITION
 
 	if(climax_choice == CLIMAX_PENIS || climax_choice == CLIMAX_BOTH)
+		//SPLURT ADDITION START
+		if(!has_testicles)
+			visible_message(span_userlove("[src] orgasms, but nothing comes out of [self_their] penis!"), \
+				span_userlove("You orgasm, it feels great, but nothing comes out of your penis!"))
+			return TRUE
+		//SPLURT ADDITION END
 		var/obj/item/organ/genital/penis/penis = get_organ_slot(ORGAN_SLOT_PENIS)
 		if(!(testicles || testicles?.reagents.total_volume < MIN_CUM_THRESHOLD) && ishuman(src)) //If we have no god damn balls, we can't cum anywhere... GET BALLS! , OR theres so little in your balls that nothing comes out... // SPLURT EDIT - Interactions
 			visible_message(span_userlove("[src] orgasms, but nothing comes out of [self_their] penis!"), \
@@ -260,6 +267,8 @@
 			//SPLURT EDIT CHANGE BEGIN - Interactions
 			if(!(climax_interaction?.interaction_modifier_flags & INTERACTION_OVERRIDE_FLUID_TRANSFER) && ishuman(src))
 				if(create_cum_decal)
+					if(!has_testicles)
+						return TRUE
 					if(HAS_TRAIT(src, TRAIT_MESSY))
 						// Transfer reagents to the turf uisng liquids system
 						var/datum/reagents/R = new(testicles.internal_fluid_maximum)
@@ -278,6 +287,10 @@
 				else if(partner || interactable_inrange_mobs[target_choice])
 					// Transfer reagents directly to partner
 					var/mob/living/target_mob = partner || interactable_inrange_mobs[target_choice]
+					//SPLURT ADDITION START
+					if(!has_testicles)
+						return TRUE
+					//SPLURT ADDITION END
 
 					var/datum/reagents/R = new(testicles.internal_fluid_maximum)
 
@@ -291,6 +304,8 @@
 					R.trans_to(target_mob, R.total_volume, transferred_by = src, methods = INGEST)
 					qdel(R)
 				else
+					if(!has_testicles)
+						return TRUE
 					testicles.reagents.remove_all(testicles.cumshot_size)
 			//SPLURT EDIT CHANGE END
 
