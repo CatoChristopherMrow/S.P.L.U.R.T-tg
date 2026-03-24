@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'tgui/backend';
 import {
   Button,
   Collapsible,
@@ -12,19 +11,14 @@ import {
 } from 'tgui-core/components';
 import { toFixed } from 'tgui-core/math';
 import { capitalize } from 'tgui-core/string';
-
-import { clearChat, saveChatToDisk } from '../chat/actions';
-import { THEMES } from '../themes';
-import { exportSettings, updateSettings } from './actions';
-import { FONTS } from './constants';
+import { chatRenderer } from '../chat/renderer';
+import { FONTS, THEMES } from './constants';
 import { resetPaneSplitters, setEditPaneSplitters } from './scaling';
 import { selectSettings } from './selectors';
 import { importChatSettings } from './settingsImExport';
 
 export function SettingsGeneral(props) {
-  const { theme, fontFamily, fontSize, lineHeight } =
-    useSelector(selectSettings);
-  const dispatch = useDispatch();
+  const { settings, updateSettings } = useSettings();
   const [freeFont, setFreeFont] = useState(false);
 
   const [editingPanes, setEditingPanes] = useState(false);
@@ -179,7 +173,7 @@ export function SettingsGeneral(props) {
           <Button
             icon="compact-disc"
             tooltip="Export chat settings"
-            onClick={() => dispatch(exportSettings())}
+            onClick={exportChatSettings}
           >
             Export settings
           </Button>
@@ -198,7 +192,7 @@ export function SettingsGeneral(props) {
           <Button
             icon="save"
             tooltip="Export current tab history into HTML file"
-            onClick={() => dispatch(saveChatToDisk())}
+            onClick={chatRenderer.saveToDisk}
           >
             Save chat log
           </Button>
@@ -207,7 +201,7 @@ export function SettingsGeneral(props) {
           <Button.Confirm
             icon="trash"
             tooltip="Erase current tab history"
-            onClick={() => dispatch(clearChat())}
+            onClick={chatRenderer.clearChat}
           >
             Clear chat
           </Button.Confirm>

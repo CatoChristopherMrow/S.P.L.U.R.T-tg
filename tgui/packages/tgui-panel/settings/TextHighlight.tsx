@@ -1,4 +1,3 @@
-import { useDispatch, useSelector } from 'tgui/backend';
 import {
   Box,
   Button,
@@ -10,13 +9,7 @@ import {
   Stack,
   TextArea,
 } from 'tgui-core/components';
-
-import { rebuildChat } from '../chat/actions';
-import {
-  addHighlightSetting,
-  removeHighlightSetting,
-  updateHighlightSetting,
-} from './actions';
+import { chatRenderer } from '../chat/renderer';
 import { WARN_AFTER_HIGHLIGHT_AMT } from './constants';
 import {
   selectHighlightSettingById,
@@ -24,8 +17,10 @@ import {
 } from './selectors';
 
 export function TextHighlightSettings(props) {
-  const highlightSettings = useSelector(selectHighlightSettings);
-  const dispatch = useDispatch();
+  const {
+    highlights: { highlightSettings },
+    addHighlight,
+  } = useHighlights();
 
   return (
     <Section fill scrollable height="250px">
@@ -60,7 +55,7 @@ export function TextHighlightSettings(props) {
       </Stack>
       <Divider />
       <Box>
-        <Button icon="check" onClick={() => dispatch(rebuildChat())}>
+        <Button icon="check" onClick={() => chatRenderer.rebuildChat()}>
           Apply now
         </Button>
         <Box inline fontSize="0.9em" ml={1} color="label">
