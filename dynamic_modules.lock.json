@@ -1,6 +1,16 @@
 {
   "lockfile_version": 1,
   "modules": {
+    "contraband-warning": {
+      "commit": "4b374049599cdd3e1652e6f5947f5572695734d1",
+      "dependencies": [],
+      "manifest": "dynamic_modules/installed/contraband-warning/contraband-warning.module.toml",
+      "manifest_hash": "sha256:c5ab986413d169e11199e7cf6b1ebcf03a8149187fbeca298ba06e826287d780",
+      "module_api": "1",
+      "name": "Contraband Warning",
+      "repo": "https://github.com/CatoChristopherMrow/contraband-warning.git",
+      "version": "1.0.0"
+    },
     "example-dynamic-module": {
       "commit": "8ca503ea77fe99196d6cc16fc1f721dd03975a1e",
       "dependencies": [],
