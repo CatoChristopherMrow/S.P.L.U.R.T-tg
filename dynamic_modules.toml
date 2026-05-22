@@ -1,0 +1,21 @@
+module_roots = [
+  "dynamic_modules/installed",
+  "dynamic_modules/local",
+]
+config_dir = "config/dynamic_modules"
+lockfile = "dynamic_modules.lock.json"
+
+[build]
+dir = ".dynamic_modules_build"
+target_dme = "tgstation.dme"
+materialize_mode = "overlay"
+
+[[registries]]
+name = "dynamic-ss13-modules"
+url = "https://raw.githubusercontent.com/CatoChristopherMrow/Dynamic-SS13-Modules/main/examples/registries/example-registry.json"
+trusted = true
+
+[update]
+minimum_commit_age_hours = 24
+direct_push = true
+commit_message = "Update Dynamic SS13 modules"

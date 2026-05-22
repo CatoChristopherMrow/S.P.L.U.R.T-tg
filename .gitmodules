@@ -1,0 +1,6 @@
+[submodule "dynamic_modules/framework"]
+	path = dynamic_modules/framework
+	url = https://github.com/CatoChristopherMrow/Dynamic-SS13-Modules.git
+[submodule "dynamic_modules/installed/example-dynamic-module"]
+	path = dynamic_modules/installed/example-dynamic-module
+	url = https://github.com/CatoChristopherMrow/Example-Dynamic-SS13-Module.git

@@ -1,0 +1,15 @@
+{
+  "lockfile_version": 1,
+  "modules": {
+    "example-dynamic-module": {
+      "commit": "8ca503ea77fe99196d6cc16fc1f721dd03975a1e",
+      "dependencies": [],
+      "manifest": "dynamic_modules/installed/example-dynamic-module/example-dynamic-module.module.toml",
+      "manifest_hash": "sha256:662082ff38cdf2f031d8b3abb6515e2ac1e797354af974010286aad861d85b54",
+      "module_api": "1",
+      "name": "Example Dynamic Module",
+      "repo": "https://github.com/CatoChristopherMrow/Example-Dynamic-SS13-Module.git",
+      "version": "1.0.0"
+    }
+  }
+}
