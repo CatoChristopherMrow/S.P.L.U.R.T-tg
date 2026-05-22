@@ -50,7 +50,7 @@
 
 /obj/item/clothing/neck/cloak/colourable
 	name = "colourable cloak"
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/cloak/colourable"
 	post_init_icon_state = "gags_cloak"
 	greyscale_config = /datum/greyscale_config/cloak

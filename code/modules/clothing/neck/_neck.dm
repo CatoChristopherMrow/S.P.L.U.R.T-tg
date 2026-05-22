@@ -29,7 +29,7 @@
 	inhand_icon_state = "" //no inhands
 	w_class = WEIGHT_CLASS_SMALL
 	custom_price = PAYCHECK_CREW
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/bowtie"
 	post_init_icon_state = "bowtie_greyscale"
 	greyscale_config = /datum/greyscale_config/ties
@@ -54,7 +54,7 @@
 	alternate_worn_layer = LOW_NECK_LAYER // So that it renders below suit jackets, MODsuits, etc
 	w_class = WEIGHT_CLASS_SMALL
 	custom_price = PAYCHECK_CREW
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/tie"
 	post_init_icon_state = "tie_greyscale_tied"
 	greyscale_config = /datum/greyscale_config/ties
@@ -380,7 +380,7 @@
 /obj/item/clothing/neck/scarf
 	name = "scarf"
 	desc = "A stylish scarf. The perfect winter accessory for those with a keen fashion sense, and those who just can't handle a cold breeze on their necks."
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/scarf"
 	post_init_icon_state = "scarf"
 	w_class = WEIGHT_CLASS_TINY
@@ -447,7 +447,7 @@
 
 /obj/item/clothing/neck/large_scarf
 	name = "large scarf"
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/large_scarf"
 	post_init_icon_state = "large_scarf"
 	w_class = WEIGHT_CLASS_TINY
@@ -481,7 +481,7 @@
 
 /obj/item/clothing/neck/infinity_scarf
 	name = "infinity scarf"
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/infinity_scarf"
 	post_init_icon_state = "infinity_scarf"
 	w_class = WEIGHT_CLASS_TINY

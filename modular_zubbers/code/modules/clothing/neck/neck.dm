@@ -22,7 +22,7 @@
 /obj/item/clothing/neck/tie/bunnytie
 	name = "bowtie collar"
 	desc = "A fancy tie that includes a collar. Looking snazzy!"
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/tie/bunnytie"
 	worn_icon = 'modular_zubbers/icons/mob/clothing/neck/neck.dmi'
 	post_init_icon_state = "bowtie_collar_tied"

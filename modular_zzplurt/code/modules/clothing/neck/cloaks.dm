@@ -16,7 +16,7 @@
 /obj/item/clothing/neck/cloak/alt/boatcloak/greyscale
 	name = "colorable boatcloak"
 	desc = "Colorable short-ish boatcloak."
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/cloak/alt/boatcloak/greyscale"
 	post_init_icon_state = "boatcloak"
 	greyscale_colors = "#EEEEEE"

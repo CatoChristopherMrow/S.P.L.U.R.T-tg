@@ -22,7 +22,7 @@
 /obj/item/clothing/neck/human_petcollar
 	name = "pet collar"
 	desc = "It's for pets. Though you probably could wear it yourself, you'd doubtless be the subject of ridicule."
-	icon = 'icons/map_icons/clothing/neck.dmi'
+	icon = 'icons/map_icons/clothing/neck_map.dmi'
 	icon_state = "/obj/item/clothing/neck/human_petcollar"
 	post_init_icon_state = "pet"
 	greyscale_config = /datum/greyscale_config/collar/pet
