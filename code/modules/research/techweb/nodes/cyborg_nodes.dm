@@ -114,11 +114,6 @@
 	research_costs = list(TECHWEB_POINT_TYPE_GENERIC = TECHWEB_TIER_3_POINTS)
 	announce_channels = list(RADIO_CHANNEL_SCIENCE)
 
-/datum/techweb_node/borg_utility/New()
-	. = ..()
-	if(!CONFIG_GET(flag/disable_secborg))
-		design_ids += "borg_upgrade_disablercooler"
-
 /datum/techweb_node/borg_engi
 	id = TECHWEB_NODE_BORG_ENGI
 	display_name = "Engineering Cyborg Upgrades"

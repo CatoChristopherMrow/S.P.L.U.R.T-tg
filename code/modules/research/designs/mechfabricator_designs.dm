@@ -1247,22 +1247,6 @@
 		RND_CATEGORY_MECHFAB_CYBORG_MODULES + RND_SUBCATEGORY_MECHFAB_CYBORG_MODULES_ALL
 	)
 
-/datum/design/borg_upgrade_disablercooler
-	name = "Rapid Disabler Cooling Module"
-	id = "borg_upgrade_disablercooler"
-	build_type = MECHFAB
-	build_path = /obj/item/borg/upgrade/disablercooler
-	materials = list(
-		/datum/material/iron = SHEET_MATERIAL_AMOUNT*10,
-		/datum/material/glass =SHEET_MATERIAL_AMOUNT*3,
-		/datum/material/gold =SHEET_MATERIAL_AMOUNT,
-		/datum/material/diamond =SHEET_MATERIAL_AMOUNT,
-	)
-	construction_time = 12 SECONDS
-	category = list(
-		RND_CATEGORY_MECHFAB_CYBORG_MODULES + RND_SUBCATEGORY_MECHFAB_CYBORG_MODULES_SECURITY
-	)
-
 /datum/design/borg_upgrade_diamonddrill
 	name = "Diamond Drill"
 	id = "borg_upgrade_diamonddrill"

@@ -97,41 +97,6 @@
 		borg.notify_ai(AI_NOTIFICATION_CYBORG_RENAMED, oldname, borg.real_name)
 	user.log_message("used a cyborg reclassification board to rename [oldkeyname] to [key_name(borg)]", LOG_GAME)
 
-/obj/item/borg/upgrade/disablercooler
-	name = "cyborg rapid disabler cooling module"
-	desc = "Used to cool a mounted disabler, increasing the potential current in it and thus its recharge rate."
-	icon_state = "module_security"
-	require_model = TRUE
-	model_type = list(/obj/item/robot_model/security)
-	model_flags = BORG_MODEL_SECURITY
-	// We handle this in a custom way
-	allow_duplicates = TRUE
-
-/obj/item/borg/upgrade/disablercooler/action(mob/living/silicon/robot/borg, mob/living/user = usr)
-	. = ..()
-	if(!.)
-		return .
-
-	var/obj/item/gun/energy/disabler/cyborg/disabler = locate() in borg.model.modules
-	if(isnull(disabler))
-		to_chat(user, span_warning("There's no disabler in this unit!"))
-		return FALSE
-	if(disabler.charge_delay <= 2)
-		to_chat(borg, span_warning("A cooling unit is already installed!"))
-		to_chat(user, span_warning("There's no room for another cooling unit!"))
-		return FALSE
-
-	disabler.charge_delay = max(2 , disabler.charge_delay - 4)
-
-/obj/item/borg/upgrade/disablercooler/deactivate(mob/living/silicon/robot/borg, mob/living/user = usr)
-	. = ..()
-	if(!.)
-		return .
-	var/obj/item/gun/energy/disabler/cyborg/disabler = locate() in borg.model.modules
-	if(isnull(disabler))
-		return FALSE
-	disabler.charge_delay = initial(disabler.charge_delay)
-
 /obj/item/borg/upgrade/thrusters
 	name = "ion thruster upgrade"
 	desc = "An energy-operated thruster system for cyborgs."

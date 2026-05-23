@@ -36,8 +36,9 @@ GLOBAL_LIST_INIT(non_ruleset_antagonists, list(
 	return data
 
 /datum/preference_middleware/antags/get_ui_assets()
+	var/datum/asset/spritesheet/antagonists/antag_assets = get_asset_datum(/datum/asset/spritesheet/antagonists)
 	return list(
-		get_asset_datum(/datum/asset/spritesheet/antagonists),
+		antag_assets,
 	)
 
 /datum/preference_middleware/antags/proc/set_antags(list/params, mob/user)
