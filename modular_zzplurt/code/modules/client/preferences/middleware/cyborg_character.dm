@@ -1173,20 +1173,11 @@
 
 	return AROUSAL_NONE
 
-/proc/cyborg_character_get_genital_color_layers(datum/preferences/preferences, organ_slot, list/layout_entry)
+/proc/cyborg_character_get_genital_color_layers(datum/preferences/preferences, organ_slot)
 	var/sprite_choice = cyborg_character_get_sprite_choice(preferences, organ_slot)
 	var/datum/sprite_accessory/genital/accessory = SSaccessories.sprite_accessories[organ_slot]?[sprite_choice]
 	var/mob/living/silicon/robot/cyborg_character_catalog_host/catalog_host = preferences?.cyborg_character_preview_view?.preview_robot
 	if(catalog_host && accessory)
-		if(!islist(catalog_host.cyborg_genital_active_layout))
-			catalog_host.cyborg_genital_active_layout = list()
-		if(!islist(catalog_host.cyborg_genital_sprite_choices))
-			catalog_host.cyborg_genital_sprite_choices = list()
-		if(!islist(catalog_host.cyborg_genital_arousal_states))
-			catalog_host.cyborg_genital_arousal_states = list()
-		catalog_host.cyborg_genital_active_layout[organ_slot] = deep_copy_list(layout_entry)
-		catalog_host.cyborg_genital_sprite_choices[organ_slot] = sprite_choice
-		catalog_host.cyborg_genital_arousal_states[organ_slot] = cyborg_character_get_preview_genital_arousal_state(preferences, organ_slot)
 		var/list/color_layers = catalog_host.get_cyborg_genital_color_layer_names(organ_slot, accessory)
 		if(length(color_layers))
 			return color_layers
@@ -1716,7 +1707,6 @@
 	catalog_host.robot_resting = cyborg_character_get_preview_robot_resting(selected_state)
 	catalog_host.simulated_genitals = list()
 	catalog_host.toggleable_cyborg_genitals = list()
-	catalog_host.cyborg_genital_active_layout = cyborg_genital_layout_store["active"]
 	catalog_host.cyborg_genital_sprite_choices = list()
 	catalog_host.cyborg_genital_arousal_states = list()
 
