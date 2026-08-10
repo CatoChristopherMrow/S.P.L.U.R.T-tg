@@ -244,7 +244,7 @@
 		faction = string_list(faction)
 	simulated_genitals = list()
 	toggleable_cyborg_genitals = list()
-	cyborg_genital_layout = list()
+	cyborg_genital_active_layout = list()
 	cyborg_genital_sprite_choices = list()
 	cyborg_genital_arousal_states = list()
 	cyborg_genital_image_holders = list()
@@ -1173,20 +1173,11 @@
 
 	return AROUSAL_NONE
 
-/proc/cyborg_character_get_genital_color_layers(datum/preferences/preferences, organ_slot, list/layout_entry)
+/proc/cyborg_character_get_genital_color_layers(datum/preferences/preferences, organ_slot)
 	var/sprite_choice = cyborg_character_get_sprite_choice(preferences, organ_slot)
 	var/datum/sprite_accessory/genital/accessory = SSaccessories.sprite_accessories[organ_slot]?[sprite_choice]
 	var/mob/living/silicon/robot/cyborg_character_catalog_host/catalog_host = preferences?.cyborg_character_preview_view?.preview_robot
 	if(catalog_host && accessory)
-		if(!islist(catalog_host.cyborg_genital_layout))
-			catalog_host.cyborg_genital_layout = list()
-		if(!islist(catalog_host.cyborg_genital_sprite_choices))
-			catalog_host.cyborg_genital_sprite_choices = list()
-		if(!islist(catalog_host.cyborg_genital_arousal_states))
-			catalog_host.cyborg_genital_arousal_states = list()
-		catalog_host.cyborg_genital_layout[organ_slot] = deep_copy_list(layout_entry)
-		catalog_host.cyborg_genital_sprite_choices[organ_slot] = sprite_choice
-		catalog_host.cyborg_genital_arousal_states[organ_slot] = cyborg_character_get_preview_genital_arousal_state(preferences, organ_slot)
 		var/list/color_layers = catalog_host.get_cyborg_genital_color_layer_names(organ_slot, accessory)
 		if(length(color_layers))
 			return color_layers
@@ -1716,7 +1707,6 @@
 	catalog_host.robot_resting = cyborg_character_get_preview_robot_resting(selected_state)
 	catalog_host.simulated_genitals = list()
 	catalog_host.toggleable_cyborg_genitals = list()
-	catalog_host.cyborg_genital_layout = deep_copy_list(store?["active"])
 	catalog_host.cyborg_genital_sprite_choices = list()
 	catalog_host.cyborg_genital_arousal_states = list()
 
@@ -1845,7 +1835,7 @@
 			preview_animation_label = "idle"
 	for(var/organ_slot in catalog_host.get_cyborg_genital_slots())
 		var/list/base_genital_overlays = catalog_host.make_cyborg_genital_overlay(organ_slot, preview_dir, preview_direction_key, TRUE)
-		var/list/genital_layout_entry = catalog_host.get_cyborg_genital_layout_entry(organ_slot)
+		var/list/genital_layout_entry = catalog_host.cyborg_genital_active_layout[organ_slot]
 		var/list/genital_direction_entry = catalog_host.get_cyborg_genital_direction_entry(organ_slot, genital_layout_entry, preview_direction_key)
 		var/datum/sprite_accessory/genital/genital_accessory = catalog_host.get_cyborg_genital_sprite_accessory(organ_slot)
 		var/genital_sprite_suffix = catalog_host.get_cyborg_genital_overlay_sprite_suffix(organ_slot, genital_accessory)
