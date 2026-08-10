@@ -2095,13 +2095,13 @@
 	var/list/legacy_lying_entry = sanitize_cyborg_genital_direction_entry(advanced_entry?["lying"])
 	for(var/direction_key in get_cyborg_genital_direction_keys())
 		var/rest_stage_key = get_cyborg_genital_rest_stage_key(direction_key)
-		if(rest_stage_key && islist(advanced_entry) && !(direction_key in advanced_entry) && (rest_stage_key in advanced_entry))
-			advanced_entry[direction_key] = sanitize_cyborg_genital_direction_entry(advanced_entry[rest_stage_key])
-			continue
-		if(is_cyborg_genital_rest_stage_key(direction_key) && islist(advanced_entry) && !(direction_key in advanced_entry) && ("lying" in advanced_entry))
+		if(rest_stage_key && !(direction_key in advanced_entry) && (rest_stage_key in advanced_entry))
+			sanitize_cyborg_genital_direction_entry(advanced_entry[rest_stage_key])
+		else if(is_cyborg_genital_rest_stage_key(direction_key) && !(direction_key in advanced_entry) && ("lying" in advanced_entry))
 			advanced_entry[direction_key] = legacy_lying_entry.Copy()
+			sanitize_cyborg_genital_direction_entry(advanced_entry[direction_key])
 		else
-			advanced_entry[direction_key] = sanitize_cyborg_genital_direction_entry(advanced_entry?[direction_key])
+			sanitize_cyborg_genital_direction_entry(advanced_entry[direction_key])
 
 /mob/living/silicon/robot/proc/sanitize_cyborg_genital_layout_list(list/layouts)
 	for(var/organ_slot in get_cyborg_genital_slots())
@@ -2160,7 +2160,6 @@
 		return FALSE
 	cyborg_genital_layout_store = preferences.read_preference(/datum/preference/blob/silicon_genital_layout_presets)
 	sanitize_cyborg_genital_layout_store()
-	cyborg_genital_active_layout = cyborg_genital_layout_store["active"]
 	return TRUE
 
 /mob/living/silicon/robot/proc/get_cyborg_genital_model_key()
@@ -3343,22 +3342,19 @@
 		var/list/direction_entry = cyborg_genital_active_layout["advanced"][direction_key]
 		var/arousal_key = get_cyborg_genital_layout_arousal_key(organ_slot, arousal_state)
 		if(arousal_key)
-			var/list/arousal_entry = direction_entry["arousal"]?[arousal_key]
+			var/list/arousal_entry = direction_entry["arousal"][arousal_key]
 			if(!islist(arousal_entry))
 				arousal_entry = list()
-			arousal_entry[field_name] = value
-			sanitize_cyborg_genital_direction_override_entry(arousal_entry)
-			if(length(arousal_entry))
-				if(!islist(direction_entry["arousal"]))
-					direction_entry["arousal"] = list()
 				direction_entry["arousal"][arousal_key] = arousal_entry
-			else if(islist(direction_entry["arousal"]))
+
+			arousal_entry[field_name] = value
+
+			if(!length(arousal_entry))
 				direction_entry["arousal"] -= arousal_key
-				if(!length(direction_entry["arousal"]))
-					direction_entry -= "arousal"
 		else
 			direction_entry[field_name] = value
-		cyborg_genital_active_layout["advanced"][direction_key] = sanitize_cyborg_genital_direction_entry(direction_entry)
+
+		sanitize_cyborg_genital_direction_entry(direction_entry)
 	else
 		if(field_name != "pixel_x" && field_name != "pixel_y" && field_name != "rotation" && field_name != "scale")
 			return FALSE
